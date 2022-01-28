@@ -2,7 +2,7 @@
 
 ## Usage
 
-- Each line in `drama_list.txt` is of the format `[url] [playlist_name]`; wavfiles and subtitle file will be saved to `[data_dir]/[playlist_name]/[video_id].{wav,vtt}`.
+- Each line in `drama_list.txt` is of the format `[url] [playlist_name]`; wavfiles and subtitle file will be saved to `[data_dir]/[playlist_name]/[playlist_index].{wav,vtt}`.
   - `bash crawl_playlist.sh [data_dir] playlists.txt`
 
 - `process.py` then process `.vtt` files and process it in to kaldi-style data format.
