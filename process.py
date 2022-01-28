@@ -3,7 +3,7 @@ import argparse
 import datetime
 import re
 def process_caption(caption):
-    caption = re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）：；《）《》“”()»〔〕-]+', '', caption).strip()
+    caption = re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！「」，。？、~@#￥%……&*（）：；《）《》“”()»〔〕-]+', '', caption).strip()
     return caption
 
 def get_reco_id_factory(data_dir, extension):

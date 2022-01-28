@@ -1,5 +1,5 @@
-##youtube-dl -o 'datas/%(playlist)s/%(playlist_index)s.%(ext)s' -x --audio-format wav --write-sub --sub-format srt $1
-#youtube-dl -o 'datas/%(playlist)s/%(id)s' --skip-download --write-sub --sub-format vtt $1
-while IFS= read -r line; do
-    youtube-dl -o 'datas/lanseshuilinglong/%(id)s.%(ext)s' -x --audio-format wav --write-sub --sub-format vtt $1"https://www.youtube.com/watch?v=$line"
-done < ids.txt
+while IFS=" " read -r url name;
+do
+  echo "$url $name"
+  youtube-dl -o "$1/$name/%(playlist_index)s.%(ext)s" -x --audio-format wav --write-sub --sub-format srt $url || exit 1;
+done<$2
