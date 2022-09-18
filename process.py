@@ -2,8 +2,15 @@ from pathlib import Path
 import argparse
 import datetime
 import re
+
+data_FMT = '%H:%M:%S.%f'
+output_FMT = '%S.%f'
+origin_time_str = "1900-01-01 00:00:00.000"
+origin_time = datetime.datetime.fromisoformat(origin_time_str)
+arrow = re.compile("-->")
+
 def process_caption(caption):
-    caption = re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！「」，。？、~@#￥%……&*（）：；《）《》“”()»〔〕-]+', '', caption).strip()
+    caption = re.sub('\W+', '', caption)
     return caption
 
 def get_reco_id_factory(data_dir, extension):
@@ -11,6 +18,9 @@ def get_reco_id_factory(data_dir, extension):
         relative_path = str(Path(file_path).relative_to(data_dir))
         return relative_path.replace(extension, "").replace("/", "-")
     return get_reco_id
+
+def fast_round(number, precision):
+    return int(number * (10.**precision)) / (10.**precision)
 
 ts2str = lambda timestamp: f"{(int(timestamp*100)):06}"
 
@@ -31,23 +41,20 @@ def get_utt_id(reco_id, begin_seconds, end_seconds):
     return f"{reco_id}-{ts2str(begin_seconds)}-{ts2str(end_seconds)}"
 
 def parse_vtt_to_utterances(vtt_file, reco_id, begin_offset, end_offset, merge=False):
-    data_FMT = '%H:%M:%S.%f'
-    output_FMT = '%S.%f'
-    origin_time_str = "00:00:00.000"
-    origin_time = datetime.datetime.strptime(origin_time_str, data_FMT)
     utterances = []
     with open(vtt_file) as fp:
         lines = fp.readlines()
     for idx in range(len(lines)):
         line = lines[idx]
         line = line.strip()
-        match = re.match("(\d+:\d+:\d+.\d+) --> (\d+:\d+:\d+.\d+)", line)
+        match = arrow.search(line)
         if match:
-            begin_time_str = match.group(1)
-            end_time_str = match.group(2)
+            begin_time_str, end_time_str = line.strip().split(' --> ')
+            begin_time_str = '1900-01-01 ' + begin_time_str
+            end_time_str = '1900-01-01 ' + end_time_str
             try:
-                begin_time = datetime.datetime.strptime(begin_time_str, data_FMT)
-                end_time   = datetime.datetime.strptime(end_time_str, data_FMT)
+                begin_time = datetime.datetime.fromisoformat(begin_time_str)
+                end_time = datetime.datetime.fromisoformat(end_time_str)
             except:
                 continue
             if begin_time >= end_time:
@@ -97,7 +104,7 @@ def get_all_audio_text_file_pairs(data_dir, audio_file_extension=".wav", caption
             yield audio_file, caption_file
 
 def write_wavscp(reco_id, audio_file, fp):
-    fp.write(f"{reco_id} {audio_file}\n")
+    fp.write(f"{reco_id} {audio_file.resolve()}\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
